@@ -3,6 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
+import { useRollbar } from "@rollbar/react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,9 +14,12 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const rollbar = useRollbar();
+
   React.useEffect(() => {
     console.error(error);
-  }, [error]);
+    rollbar.error(error);
+  }, [error, rollbar]);
 
   return (
     <div className="container flex flex-col items-center py-20 text-center md:py-28">
