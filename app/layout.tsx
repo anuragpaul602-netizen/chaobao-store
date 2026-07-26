@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, Noto_Serif_SC } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { StoreProvider } from "@/lib/store";
 import { Header } from "@/components/layout/header";
@@ -85,6 +86,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <CartDrawer />
           </StoreProvider>
         </ThemeProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
