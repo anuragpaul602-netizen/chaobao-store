@@ -1,0 +1,12 @@
+<svg width="180" height="48" viewBox="0 0 180 48" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ChaoBao">
+  <g>
+    <circle cx="22" cy="24" r="18" fill="#C8102E"/>
+    <path d="M13 20a9 9 0 0 1 18 0c0 6-4.5 10-9 12-4.5-2-9-6-9-12Z" fill="#FBF5EC"/>
+    <circle cx="18.5" cy="19" r="1.6" fill="#171310"/>
+    <circle cx="25.5" cy="19" r="1.6" fill="#171310"/>
+    <path d="M18 24c1.2 1.4 2.8 1.4 4 0" stroke="#171310" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+    <path d="M12 9c1-1.5 2.5-2.5 4-3" stroke="#FBF5EC" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M17 6c0.6-1.6 1.7-2.8 3-3.6" stroke="#FBF5EC" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+  </g>
+  <text x="50" y="31" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800" font-size="24" fill="#171310">chaobao</text>
+</svg>
