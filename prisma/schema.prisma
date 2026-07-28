@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductBadge {
+  new
+  bestseller
+  trending
+  sale
+  limited
+}
+
+model Product {
+  id       String @id
+  slug     String @unique
+  name     String
+  brand    String
+  category String
+
+  /// Selling price in paise (₹1 = 100 paise). PLACEHOLDER — see prisma/seed-data.ts header.
+  pricePaise Int
+  /// List price in paise. Equal to pricePaise when the item isn't discounted.
+  mrpPaise   Int
+
+  unitLabel    String
+  unitsPerCase Int
+  grams        Int?
+  isLiquid     Boolean
+
+  rating      Float
+  reviewCount Int
+  stock       Int
+  badges      ProductBadge[]
+  image       String
+
+  shortDescription String
+  countryOfOrigin  String
+
+  supplier   String
+  sourceCode String
+  casePack   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([brand])
+}

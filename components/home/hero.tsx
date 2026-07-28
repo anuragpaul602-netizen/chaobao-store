@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { products, brands } from "@/lib/data/products";
+import { getAllProducts, getBrands } from "@/lib/products";
 import { categoryImage } from "@/lib/data/category-images";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,9 @@ const MARQUEE = [
   "凤梨酥 Pineapple cake",
 ];
 
-export function Hero() {
+export async function Hero() {
+  const products = await getAllProducts();
+  const brands = await getBrands();
   return (
     <section className="relative overflow-hidden bg-muted">
       <div className="container grid items-center gap-10 py-16 md:py-24 lg:grid-cols-2">

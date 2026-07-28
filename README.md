@@ -51,7 +51,7 @@ in either file) before generating anything.
 
 INR prices are modelled from category + pack weight (₹89–₹899, avg ₹290) so the store
 looks and behaves correctly. They are estimates, not quotes. The header comment in
-`lib/data/products.ts` says the same thing, and the home page carries a
+`prisma/seed-data.ts` says the same thing, and the home page carries a
 `DataProvenance` section documenting it — **delete that section before going public.**
 
 Catalogues also list wholesale cases (e.g. `1 x 12 x 397g`); as agreed the store sells
@@ -96,9 +96,16 @@ components/
   ui/           button, badge, reveal, skeleton
   theme-provider.tsx
 lib/
-  store.tsx     cart + wishlist React context
-  utils.ts      cn(), formatINR(), discountPercent()
-  data/products.ts   ← the 166-product catalogue
+  store.tsx        cart + wishlist React context (takes server-fetched products as a prop)
+  products.ts      async, Prisma-backed data-access layer (getAllProducts, getProductBySlug, …)
+  prisma.ts        PrismaClient singleton (pg driver adapter)
+  utils.ts         cn(), formatINR(), discountPercent()
+  data/category-labels.ts   CATEGORY_LABELS display-name map
+prisma/
+  schema.prisma    Product model + ProductBadge enum
+  seed.ts, seed-data.ts   seed script + the 166-product seed input
+  migrations/
+generated/prisma/  generated Prisma Client (gitignored)
 types/product.ts
 ```
 
@@ -115,6 +122,21 @@ no duplicate ids/slugs, no MRP below selling price, all categories within the ty
 union. (`next build` couldn't run in my Linux sandbox because the installed SWC
 binary is macOS-only — run it locally to confirm.)
 
-## Next up (Milestone 3)
-PostgreSQL + Prisma schema, seed script that loads this catalogue into the DB,
-NextAuth authentication, then checkout with Razorpay/Stripe/COD.
+## Milestone 3 (part 1) — Postgres + Prisma data layer
+The 166-product catalogue now lives in Postgres (Neon, provisioned via the Vercel
+Marketplace) instead of a hardcoded array. `prisma/schema.prisma` defines the
+`Product` model; `prisma/seed-data.ts` + `prisma/seed.ts` load the same 166 rows
+(placeholder pricing/stock/images preserved byte-for-byte — still not real data).
+`lib/products.ts` is the async, Prisma-backed data-access layer every Server
+Component now calls instead of importing a static array; client components
+(`header.tsx`, `shop-client.tsx`, the wishlist page) read the catalogue via
+`useStore()`, which is fed the DB-fetched product list from `app/layout.tsx`.
+
+Note: Prisma 7's `prisma-client` generator requires a driver adapter — this app
+uses `@prisma/adapter-pg` (plain TCP over `pg`) rather than Neon's WebSocket
+driver, since all queries run in standard Next.js Server Components on Node.js,
+not Edge.
+
+## Next up (Milestone 4)
+NextAuth authentication, then checkout with Razorpay/Stripe/COD. Real
+pricing/stock/image data still needs to replace the placeholders before launch.

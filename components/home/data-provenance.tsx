@@ -1,16 +1,16 @@
 import { FileText, Languages, IndianRupee, TriangleAlert } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
-import { products } from "@/lib/data/products";
-
-const LTP_COUNT = products.filter((p) => p.supplier.startsWith("LTP")).length;
-const CHADHA_COUNT = products.filter((p) => p.supplier.startsWith("Chadha")).length;
+import { getAllProducts } from "@/lib/products";
 
 /**
  * Internal-facing annotation strip. It documents exactly where the catalogue
  * came from and which fields are still placeholders. Delete this section
  * before the store goes public.
  */
-export function DataProvenance() {
+export async function DataProvenance() {
+  const products = await getAllProducts();
+  const LTP_COUNT = products.filter((p) => p.supplier.startsWith("LTP")).length;
+  const CHADHA_COUNT = products.filter((p) => p.supplier.startsWith("Chadha")).length;
   return (
     <section className="border-y border-border bg-paper py-14">
       <div className="container">

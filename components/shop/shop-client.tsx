@@ -6,7 +6,8 @@ import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight, PackageSearch 
 import { ProductCard } from "@/components/product/product-card";
 import { QuickView } from "@/components/product/quick-view";
 import { ProductCardSkeleton } from "@/components/ui/skeleton";
-import { products, CATEGORY_LABELS, categories, brands, maxPricePaise } from "@/lib/data/products";
+import { CATEGORY_LABELS } from "@/lib/data/category-labels";
+import { useStore } from "@/lib/store";
 import type { Product, SortKey } from "@/types/product";
 import { formatINR, cn } from "@/lib/utils";
 
@@ -38,6 +39,20 @@ export function ShopClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { products } = useStore();
+
+  const categories = React.useMemo(
+    () => Array.from(new Set(products.map((p) => p.category))).sort(),
+    [products]
+  );
+  const brands = React.useMemo(
+    () => Array.from(new Set(products.map((p) => p.brand))).sort(),
+    [products]
+  );
+  const maxPricePaise = React.useMemo(
+    () => Math.max(...products.map((p) => p.pricePaise)),
+    [products]
+  );
 
   const urlQuery = searchParams.get("q") ?? "";
   const categoryParam = searchParams.get("category");
@@ -124,7 +139,7 @@ export function ShopClient() {
     };
     list = [...list].sort(order[sort]);
     return list;
-  }, [urlQuery, activeCats, activeBrands, priceInput, inStockOnly, onSaleOnly, sort]);
+  }, [products, urlQuery, activeCats, activeBrands, priceInput, inStockOnly, onSaleOnly, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const currentPage = Math.min(page, totalPages);

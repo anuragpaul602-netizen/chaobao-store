@@ -1,7 +1,8 @@
 import { ProductRail } from "@/components/home/product-rail";
-import { featuredProducts } from "@/lib/data/products";
+import { getFeaturedProducts } from "@/lib/products";
 
-export function FeaturedProducts() {
+export async function FeaturedProducts() {
+  const featuredProducts = await getFeaturedProducts();
   return (
     <ProductRail
       eyebrow="Customer favorites"

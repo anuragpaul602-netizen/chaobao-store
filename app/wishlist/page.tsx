@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { HeartOff } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { products } from "@/lib/data/products";
 import { ProductCard } from "@/components/product/product-card";
 import { buttonVariants } from "@/components/ui/button";
 
 export default function WishlistPage() {
-  const { wishlist } = useStore();
+  const { wishlist, products } = useStore();
   const saved = products.filter((p) => wishlist.includes(p.id));
 
   return (

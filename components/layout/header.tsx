@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Menu, X, Search, Heart, ShoppingBag, Moon, Sun } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { products } from "@/lib/data/products";
 import { cn, formatINR } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -25,7 +24,7 @@ export function Header() {
   const [q, setQ] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
   const { resolvedTheme, setTheme } = useTheme();
-  const { cartCount, openCart, wishlist } = useStore();
+  const { cartCount, openCart, wishlist, products } = useStore();
   const router = useRouter();
 
   React.useEffect(() => setMounted(true), []);
@@ -37,7 +36,7 @@ export function Header() {
     return products
       .filter((p) => `${p.name} ${p.brand}`.toLowerCase().includes(term))
       .slice(0, 6);
-  }, [q]);
+  }, [q, products]);
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();

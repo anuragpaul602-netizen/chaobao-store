@@ -1,7 +1,8 @@
 import { ProductRail } from "@/components/home/product-rail";
-import { newArrivals } from "@/lib/data/products";
+import { getNewArrivals } from "@/lib/products";
 
-export function NewArrivals() {
+export async function NewArrivals() {
+  const newArrivals = await getNewArrivals();
   return (
     <ProductRail
       eyebrow="Just landed"

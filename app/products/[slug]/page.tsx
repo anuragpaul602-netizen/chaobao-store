@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetail } from "@/components/product/product-detail";
-import { products, getProductBySlug, relatedProducts } from "@/lib/data/products";
+import { getAllProducts, getProductBySlug, getRelatedProducts } from "@/lib/products";
 import { formatINR } from "@/lib/utils";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getAllProducts();
   return products.map((p) => ({ slug: p.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const product = getProductBySlug(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: { slug: string };
+}): Promise<Metadata> {
+  const product = await getProductBySlug(params.slug);
   if (!product) return { title: "Product not found" };
 
   const title = `${product.brand} ${product.name} — ${product.unitLabel}`;
@@ -26,11 +31,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const related = relatedProducts(product, 4);
+  const related = await getRelatedProducts(product, 4);
 
   const productSchema = {
     "@context": "https://schema.org",

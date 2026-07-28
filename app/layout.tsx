@@ -7,6 +7,7 @@ import { StoreProvider } from "@/lib/store";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
+import { getAllProducts } from "@/lib/products";
 import "./globals.css";
 
 const display = Plus_Jakarta_Sans({
@@ -65,13 +66,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const products = await getAllProducts();
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${display.variable} ${body.variable} ${accent.variable} font-body`}>
         <RollbarProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <StoreProvider>
+            <StoreProvider products={products}>
               <a
                 href="#main"
                 className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
