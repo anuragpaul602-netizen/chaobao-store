@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, Noto_Serif_SC } from "next/font/google";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { RollbarProvider } from "@/components/rollbar-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { StoreProvider } from "@/lib/store";
@@ -92,6 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </ThemeProvider>
         </RollbarProvider>
         <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
