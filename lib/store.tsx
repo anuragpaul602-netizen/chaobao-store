@@ -46,6 +46,7 @@ interface StoreValue {
   addToCart: (p: Product, qty?: number) => void;
   setQty: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   toggleWishlist: (id: string) => void;
   isWishlisted: (id: string) => boolean;
   openCart: () => void;
@@ -136,6 +137,8 @@ export function StoreProvider({
     setCart((prev) => prev.filter((l) => l.product.id !== id));
   }, []);
 
+  const clearCart = React.useCallback(() => setCart([]), []);
+
   const toggleWishlist = React.useCallback((id: string) => {
     setWishlist((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }, []);
@@ -153,12 +156,23 @@ export function StoreProvider({
       addToCart,
       setQty,
       removeFromCart,
+      clearCart,
       toggleWishlist,
       isWishlisted: (id: string) => wishlist.includes(id),
       openCart: () => setCartOpen(true),
       closeCart: () => setCartOpen(false),
     };
-  }, [products, cart, wishlist, cartOpen, addToCart, setQty, removeFromCart, toggleWishlist]);
+  }, [
+    products,
+    cart,
+    wishlist,
+    cartOpen,
+    addToCart,
+    setQty,
+    removeFromCart,
+    clearCart,
+    toggleWishlist,
+  ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

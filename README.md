@@ -137,6 +137,27 @@ uses `@prisma/adapter-pg` (plain TCP over `pg`) rather than Neon's WebSocket
 driver, since all queries run in standard Next.js Server Components on Node.js,
 not Edge.
 
-## Next up (Milestone 4)
-NextAuth authentication, then checkout with Razorpay/Stripe/COD. Real
-pricing/stock/image data still needs to replace the placeholders before launch.
+## Milestone 4 — accounts + checkout (Stripe + COD)
+- **Auth**: Auth.js v5 (`next-auth@beta`), Credentials (email/password, bcryptjs-hashed)
+  + Google OAuth, persisted via `@auth/prisma-adapter`. Split into an edge-safe
+  `auth.config.ts` (used by `middleware.ts`, which runs on Next 14's default Edge
+  runtime) and a full `auth.ts` (Prisma adapter + Credentials provider, Node-only).
+  `/checkout`, `/account/*`, `/orders/*` are gated by `middleware.ts`.
+- **Checkout**: custom-built (not Shopify — the existing Prisma catalogue, cart and
+  UI stay as-is). `/checkout` → `POST /api/orders` (recomputes totals server-side
+  from live `Product` rows, snapshots name/brand/price/image onto each `OrderItem`
+  so a placed order never changes if the catalogue does) → Stripe hosted Checkout
+  (`POST /api/checkout/stripe`, confirmed via `POST /api/webhooks/stripe`) or
+  Cash on Delivery (confirmed immediately, no gateway).
+- Stripe provisioned via the Vercel Marketplace (test-mode sandbox — claim it
+  with `vercel integration resource claim` before going live). Razorpay is not
+  used: not available as a native Vercel Marketplace payments integration.
+- **Manual setup still needed before this is fully live**: a real Google OAuth
+  app (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env.local`/Vercel) and a
+  Stripe webhook endpoint for production (`STRIPE_WEBHOOK_SECRET` — use
+  `stripe listen` locally in the meantime).
+
+## Next up (Milestone 5)
+Real pricing/stock/image data still needs to replace the placeholders before
+launch. Beyond that: saved/multiple shipping addresses, order cancellation,
+transactional order-confirmation email.

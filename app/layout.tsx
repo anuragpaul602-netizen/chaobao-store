@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Inter, Noto_Serif_SC } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { RollbarProvider } from "@/components/rollbar-provider";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthSessionProvider } from "@/components/session-provider";
 import { StoreProvider } from "@/lib/store";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -73,24 +75,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${display.variable} ${body.variable} ${accent.variable} font-body`}>
         <RollbarProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <StoreProvider products={products}>
-              <a
-                href="#main"
-                className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
-              >
-                Skip to content
-              </a>
-              <div className="flex min-h-screen flex-col">
-                <Header />
-                <main id="main" className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-              <CartDrawer />
-            </StoreProvider>
+            <AuthSessionProvider>
+              <StoreProvider products={products}>
+                <a
+                  href="#main"
+                  className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-xl focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+                >
+                  Skip to content
+                </a>
+                <div className="flex min-h-screen flex-col">
+                  <Header />
+                  <main id="main" className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
+                </div>
+                <CartDrawer />
+              </StoreProvider>
+            </AuthSessionProvider>
           </ThemeProvider>
         </RollbarProvider>
+        <Analytics />
         <SpeedInsights />
       </body>
     </html>
