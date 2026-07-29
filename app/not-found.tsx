@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { PackageSearch } from "lucide-react";
-import { CATEGORY_LABELS, categories } from "@/lib/data/products";
+import { getCategories } from "@/lib/products";
+import { CATEGORY_LABELS } from "@/lib/data/category-labels";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const categories = await getCategories();
   return (
     <div className="container flex flex-col items-center py-20 text-center md:py-28">
       <PackageSearch className="h-12 w-12 text-muted-foreground" />

@@ -1,4 +1,4 @@
-import type { Product } from "@/types/product";
+import type { Product } from "../types/product";
 
 /**
  * ChaoBao catalogue — 166 products.
@@ -24,21 +24,6 @@ import type { Product } from "@/types/product";
  *     pricePaise, mrpPaise, rating, reviewCount, stock, image
  * Everything else (name, brand, pack size, supplier code, origin) is real.
  */
-
-export const CATEGORY_LABELS: Record<string, string> = {
-  "chips": "Chips & Savoury",
-  "instant-noodles": "Instant Noodles",
-  "candy": "Candy",
-  "chocolate": "Chocolate",
-  "mochi": "Mochi",
-  "jelly": "Jelly",
-  "bubble-tea": "Bubble Tea",
-  "drinks": "Drinks",
-  "cookies": "Cookies & Bakes",
-  "gift-boxes": "Gift Boxes",
-  "sauces": "Sauces & Seasoning",
-  "pantry": "Pantry & Staples",
-};
 
 export const products: Product[] = [
   {
@@ -2533,20 +2518,3 @@ export const products: Product[] = [
   },
 
 ];
-
-export const categories = Array.from(new Set(products.map((p) => p.category))).sort();
-export const brands = Array.from(new Set(products.map((p) => p.brand))).sort();
-export const maxPricePaise = Math.max(...products.map((p) => p.pricePaise));
-export const minPricePaise = Math.min(...products.map((p) => p.pricePaise));
-
-export const featuredProducts = products.filter((p) => p.badges.includes("bestseller")).slice(0, 8);
-export const trendingProducts = products.filter((p) => p.badges.includes("trending")).slice(0, 8);
-export const newArrivals = products.filter((p) => p.badges.includes("new")).slice(0, 8);
-
-export function getProductBySlug(slug: string) {
-  return products.find((p) => p.slug === slug);
-}
-
-export function relatedProducts(p: Product, limit = 4) {
-  return products.filter((x) => x.category === p.category && x.id !== p.id).slice(0, limit);
-}

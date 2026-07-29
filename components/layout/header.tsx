@@ -5,9 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Menu, X, Search, Heart, ShoppingBag, Moon, Sun } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { Menu, X, Search, Heart, ShoppingBag, Moon, Sun, User } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { products } from "@/lib/data/products";
 import { cn, formatINR } from "@/lib/utils";
 
 const NAV_LINKS = [
@@ -25,7 +25,8 @@ export function Header() {
   const [q, setQ] = React.useState("");
   const [mounted, setMounted] = React.useState(false);
   const { resolvedTheme, setTheme } = useTheme();
-  const { cartCount, openCart, wishlist } = useStore();
+  const { cartCount, openCart, wishlist, products } = useStore();
+  const { data: session } = useSession();
   const router = useRouter();
 
   React.useEffect(() => setMounted(true), []);
@@ -37,7 +38,7 @@ export function Header() {
     return products
       .filter((p) => `${p.name} ${p.brand}`.toLowerCase().includes(term))
       .slice(0, 6);
-  }, [q]);
+  }, [q, products]);
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -98,6 +99,25 @@ export function Header() {
               className="rounded-full p-2 transition-colors hover:bg-muted"
             >
               {resolvedTheme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+          )}
+
+          <Link
+            href={mounted && session ? "/account/orders" : "/login"}
+            aria-label={mounted && session ? "My account" : "Sign in"}
+            className="rounded-full p-2 transition-colors hover:bg-muted"
+          >
+            <User className="h-5 w-5" />
+          </Link>
+
+          {mounted && session && (
+            <button
+              type="button"
+              onClick={() => signOut()}
+              aria-label="Sign out"
+              className="hidden rounded-full px-2.5 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-ink sm:inline-flex"
+            >
+              Sign out
             </button>
           )}
 

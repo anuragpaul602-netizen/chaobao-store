@@ -51,7 +51,7 @@ in either file) before generating anything.
 
 INR prices are modelled from category + pack weight (₹89–₹899, avg ₹290) so the store
 looks and behaves correctly. They are estimates, not quotes. The header comment in
-`lib/data/products.ts` says the same thing, and the home page carries a
+`prisma/seed-data.ts` says the same thing, and the home page carries a
 `DataProvenance` section documenting it — **delete that section before going public.**
 
 Catalogues also list wholesale cases (e.g. `1 x 12 x 397g`); as agreed the store sells
@@ -96,9 +96,16 @@ components/
   ui/           button, badge, reveal, skeleton
   theme-provider.tsx
 lib/
-  store.tsx     cart + wishlist React context
-  utils.ts      cn(), formatINR(), discountPercent()
-  data/products.ts   ← the 166-product catalogue
+  store.tsx        cart + wishlist React context (takes server-fetched products as a prop)
+  products.ts      async, Prisma-backed data-access layer (getAllProducts, getProductBySlug, …)
+  prisma.ts        PrismaClient singleton (pg driver adapter)
+  utils.ts         cn(), formatINR(), discountPercent()
+  data/category-labels.ts   CATEGORY_LABELS display-name map
+prisma/
+  schema.prisma    Product model + ProductBadge enum
+  seed.ts, seed-data.ts   seed script + the 166-product seed input
+  migrations/
+generated/prisma/  generated Prisma Client (gitignored)
 types/product.ts
 ```
 
@@ -115,6 +122,52 @@ no duplicate ids/slugs, no MRP below selling price, all categories within the ty
 union. (`next build` couldn't run in my Linux sandbox because the installed SWC
 binary is macOS-only — run it locally to confirm.)
 
-## Next up (Milestone 3)
-PostgreSQL + Prisma schema, seed script that loads this catalogue into the DB,
-NextAuth authentication, then checkout with Razorpay/Stripe/COD.
+## Milestone 3 (part 1) — Postgres + Prisma data layer
+The 166-product catalogue now lives in Postgres (Neon, provisioned via the Vercel
+Marketplace) instead of a hardcoded array. `prisma/schema.prisma` defines the
+`Product` model; `prisma/seed-data.ts` + `prisma/seed.ts` load the same 166 rows
+(placeholder pricing/stock/images preserved byte-for-byte — still not real data).
+`lib/products.ts` is the async, Prisma-backed data-access layer every Server
+Component now calls instead of importing a static array; client components
+(`header.tsx`, `shop-client.tsx`, the wishlist page) read the catalogue via
+`useStore()`, which is fed the DB-fetched product list from `app/layout.tsx`.
+
+Note: Prisma 7's `prisma-client` generator requires a driver adapter — this app
+uses `@prisma/adapter-pg` (plain TCP over `pg`) rather than Neon's WebSocket
+driver, since all queries run in standard Next.js Server Components on Node.js,
+not Edge.
+
+## Milestone 4 — accounts + checkout (Stripe + COD)
+- **Auth**: Auth.js v5 (`next-auth@beta`), Credentials (email/password, bcryptjs-hashed)
+  + Google OAuth, persisted via `@auth/prisma-adapter`. Split into an edge-safe
+  `auth.config.ts` (used by `middleware.ts`, which runs on Next 14's default Edge
+  runtime) and a full `auth.ts` (Prisma adapter + Credentials provider, Node-only).
+  `/checkout`, `/account/*`, `/orders/*` are gated by `middleware.ts`.
+- **Checkout**: custom-built (not Shopify — the existing Prisma catalogue, cart and
+  UI stay as-is). `/checkout` → `POST /api/orders` (recomputes totals server-side
+  from live `Product` rows, snapshots name/brand/price/image onto each `OrderItem`
+  so a placed order never changes if the catalogue does) → Stripe hosted Checkout
+  (`POST /api/checkout/stripe`, confirmed via `POST /api/webhooks/stripe`) or
+  Cash on Delivery (confirmed immediately, no gateway).
+- Stripe provisioned via the Vercel Marketplace (test-mode sandbox — claim it
+  with `vercel integration resource claim` before going live). Razorpay is not
+  used: not available as a native Vercel Marketplace payments integration.
+- **Manual setup still needed before this is fully live**: a real Google OAuth
+  app (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` in `.env.local`/Vercel) and a
+  Stripe webhook endpoint for production (`STRIPE_WEBHOOK_SECRET` — use
+  `stripe listen` locally in the meantime).
+
+## Next up (Milestone 5)
+Real pricing/stock/image data still needs to replace the placeholders before
+launch. Beyond that: saved/multiple shipping addresses, order cancellation,
+transactional order-confirmation email.
+
+## Contributing
+Contributions are welcome. Open tasks are tracked as
+[GitHub issues](https://github.com/anuragpaul602-netizen/chaobao-store/issues),
+labeled `good first issue` (self-contained) or `help wanted` (bigger scope).
+Comment on an issue to claim it before starting.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for full local setup — environment
+variables, database migrate/seed, and what's needed for auth/checkout work
+specifically — plus what to run before opening a PR.

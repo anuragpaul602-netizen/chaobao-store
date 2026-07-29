@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProductBadge {
+  new
+  bestseller
+  trending
+  sale
+  limited
+}
+
+model Product {
+  id       String @id
+  slug     String @unique
+  name     String
+  brand    String
+  category String
+
+  /// Selling price in paise (₹1 = 100 paise). PLACEHOLDER — see prisma/seed-data.ts header.
+  pricePaise Int
+  /// List price in paise. Equal to pricePaise when the item isn't discounted.
+  mrpPaise   Int
+
+  unitLabel    String
+  unitsPerCase Int
+  grams        Int?
+  isLiquid     Boolean
+
+  rating      Float
+  reviewCount Int
+  stock       Int
+  badges      ProductBadge[]
+  image       String
+
+  shortDescription String
+  countryOfOrigin  String
+
+  supplier   String
+  sourceCode String
+  casePack   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orderItems OrderItem[]
+
+  @@index([category])
+  @@index([brand])
+}
+
+// --- Auth.js (NextAuth v5) standard schema ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  /// Null for Google-only accounts; set (bcrypt hash) for Credentials sign-up.
+  password      String?
+
+  accounts Account[]
+  sessions Session[]
+  orders   Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- Orders ---
+
+enum PaymentMethod {
+  STRIPE
+  COD
+}
+
+enum OrderStatus {
+  PENDING // Stripe order awaiting payment confirmation via webhook
+  PAID // Stripe payment confirmed
+  PLACED // COD order confirmed — no gateway involved
+  CANCELLED
+  FAILED
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+
+  subtotalPaise Int
+  gstPaise      Int
+  shippingPaise Int
+  totalPaise    Int
+
+  shippingName    String
+  shippingPhone   String
+  shippingLine1   String
+  shippingLine2   String?
+  shippingCity    String
+  shippingState   String
+  shippingPincode String
+
+  stripeSessionId       String? @unique
+  stripePaymentIntentId String? @unique
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  /// Snapshot fields captured at purchase time — an Order must reflect what
+  /// was actually charged, even if the live Product later changes or is removed.
+  nameSnapshot       String
+  brandSnapshot      String
+  unitLabelSnapshot  String
+  imageSnapshot      String
+  pricePaiseSnapshot Int
+  qty                Int
+}

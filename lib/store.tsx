@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import type { Product } from "@/types/product";
-import { products } from "@/lib/data/products";
 
 /* ------------------------------------------------------------------ */
 /* Cart + wishlist store, shared through React context so the header,   */
@@ -38,6 +37,7 @@ export interface CartLine {
 }
 
 interface StoreValue {
+  products: Product[];
   cart: CartLine[];
   wishlist: string[];
   cartOpen: boolean;
@@ -46,6 +46,7 @@ interface StoreValue {
   addToCart: (p: Product, qty?: number) => void;
   setQty: (id: string, qty: number) => void;
   removeFromCart: (id: string) => void;
+  clearCart: () => void;
   toggleWishlist: (id: string) => void;
   isWishlisted: (id: string) => boolean;
   openCart: () => void;
@@ -54,7 +55,13 @@ interface StoreValue {
 
 const StoreContext = React.createContext<StoreValue | null>(null);
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({
+  children,
+  products,
+}: {
+  children: React.ReactNode;
+  products: Product[];
+}) {
   const [cart, setCart] = React.useState<CartLine[]>([]);
   const [wishlist, setWishlist] = React.useState<string[]>([]);
   const [cartOpen, setCartOpen] = React.useState(false);
@@ -84,6 +91,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
 
     setHydrated(true);
+    // Deliberately mount-only: `products` is set once from the server fetch
+    // in the root layout and re-running this on every reference change would
+    // re-apply localStorage over any in-session cart/wishlist edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   React.useEffect(() => {
@@ -126,6 +137,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) => prev.filter((l) => l.product.id !== id));
   }, []);
 
+  const clearCart = React.useCallback(() => setCart([]), []);
+
   const toggleWishlist = React.useCallback((id: string) => {
     setWishlist((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }, []);
@@ -134,6 +147,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const cartCount = cart.reduce((n, l) => n + l.qty, 0);
     const subtotalPaise = cart.reduce((n, l) => n + l.qty * l.product.pricePaise, 0);
     return {
+      products,
       cart,
       wishlist,
       cartOpen,
@@ -142,12 +156,23 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       addToCart,
       setQty,
       removeFromCart,
+      clearCart,
       toggleWishlist,
       isWishlisted: (id: string) => wishlist.includes(id),
       openCart: () => setCartOpen(true),
       closeCart: () => setCartOpen(false),
     };
-  }, [cart, wishlist, cartOpen, addToCart, setQty, removeFromCart, toggleWishlist]);
+  }, [
+    products,
+    cart,
+    wishlist,
+    cartOpen,
+    addToCart,
+    setQty,
+    removeFromCart,
+    clearCart,
+    toggleWishlist,
+  ]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

@@ -1,7 +1,8 @@
 import { ProductRail } from "@/components/home/product-rail";
-import { trendingProducts } from "@/lib/data/products";
+import { getTrendingProducts } from "@/lib/products";
 
-export function TrendingSnacks() {
+export async function TrendingSnacks() {
+  const trendingProducts = await getTrendingProducts();
   return (
     <ProductRail
       eyebrow="Going viral"

@@ -9,3 +9,13 @@ build
 .DS_Store
 next-env.d.ts
 *.tsbuildinfo
+.vercel
+.env*
+
+/generated/prisma
+
+# Agent-skill reference docs auto-installed by `prisma init`
+.claude/
+.agents/
+.windsurf/
+skills-lock.json

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { products, categories } from "@/lib/data/products";
+import { getAllProducts, getCategories } from "@/lib/products";
 
 // NEXT_PUBLIC_SITE_URL is required in production so we never ship a sitemap
 // full of localhost URLs to search engines. Dev/preview builds fall back so
@@ -12,8 +12,9 @@ if (process.env.NODE_ENV === "production" && !process.env.NEXT_PUBLIC_SITE_URL) 
 
 const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
+  const [products, categories] = await Promise.all([getAllProducts(), getCategories()]);
 
   return [
     { url: base, lastModified: now, changeFrequency: "daily", priority: 1 },

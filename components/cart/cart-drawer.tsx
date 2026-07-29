@@ -1,12 +1,18 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { X, Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { formatINR } from "@/lib/utils";
-
-const FREE_SHIPPING_THRESHOLD = 99900; // ₹999
+import {
+  cn,
+  formatINR,
+  computeOrderTotals,
+  FREE_SHIPPING_THRESHOLD_PAISE,
+  SHIPPING_FEE_PAISE,
+} from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 
 export function CartDrawer() {
   const { cart, cartOpen, closeCart, setQty, removeFromCart, subtotalPaise } = useStore();
@@ -27,11 +33,9 @@ export function CartDrawer() {
 
   if (!cartOpen) return null;
 
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotalPaise);
-  const progress = Math.min(100, (subtotalPaise / FREE_SHIPPING_THRESHOLD) * 100);
-  // Prices are tax-inclusive, so GST is extracted from the total, not added on top:
-  // subtotal = base + 12% of base = base * 1.12, so GST = subtotal * 12/112.
-  const gst = Math.round((subtotalPaise * 12) / 112);
+  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD_PAISE - subtotalPaise);
+  const progress = Math.min(100, (subtotalPaise / FREE_SHIPPING_THRESHOLD_PAISE) * 100);
+  const { gstPaise, shippingPaise, totalPaise } = computeOrderTotals(subtotalPaise);
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Shopping cart">
@@ -138,28 +142,33 @@ export function CartDrawer() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">GST (12%, included)</dt>
-                  <dd className="font-medium">{formatINR(gst)}</dd>
+                  <dd className="font-medium">{formatINR(gstPaise)}</dd>
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Shipping</dt>
                   <dd className="font-medium">
-                    {remaining > 0 ? formatINR(9900) : <span className="text-jade">Free</span>}
+                    {shippingPaise > 0 ? (
+                      formatINR(SHIPPING_FEE_PAISE)
+                    ) : (
+                      <span className="text-jade">Free</span>
+                    )}
                   </dd>
                 </div>
                 <div className="flex justify-between border-t border-border pt-2 font-display text-base font-bold">
                   <dt>Total</dt>
-                  <dd>{formatINR(subtotalPaise + (remaining > 0 ? 9900 : 0))}</dd>
+                  <dd>{formatINR(totalPaise)}</dd>
                 </div>
               </dl>
 
-              <button
-                type="button"
-                className="mt-4 h-12 w-full rounded-xl bg-lacquer text-sm font-semibold text-lacquer-foreground transition-colors hover:bg-lacquer/90"
+              <Link
+                href="/checkout"
+                onClick={closeCart}
+                className={cn(buttonVariants({ variant: "primary" }), "mt-4 h-12 w-full")}
               >
                 Checkout
-              </button>
+              </Link>
               <p className="mt-2 text-center text-[11px] text-muted-foreground">
-                Razorpay, UPI, cards &amp; COD · Checkout wiring lands in Milestone 3
+                Secure payment via Stripe · Cash on delivery available
               </p>
             </div>
           </>

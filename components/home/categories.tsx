@@ -1,10 +1,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Reveal } from "@/components/ui/reveal";
-import { products, categories, CATEGORY_LABELS } from "@/lib/data/products";
+import { getAllProducts, getCategories } from "@/lib/products";
+import { CATEGORY_LABELS } from "@/lib/data/category-labels";
 import { categoryImage } from "@/lib/data/category-images";
 
-export function Categories() {
+export async function Categories() {
+  const products = await getAllProducts();
+  const categories = await getCategories();
   const cats = categories.map((c) => ({
     value: c,
     label: CATEGORY_LABELS[c] ?? c,
