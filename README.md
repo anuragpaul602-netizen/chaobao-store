@@ -161,3 +161,25 @@ not Edge.
 Real pricing/stock/image data still needs to replace the placeholders before
 launch. Beyond that: saved/multiple shipping addresses, order cancellation,
 transactional order-confirmation email.
+
+## Contributing
+Contributions are welcome. Open tasks are tracked as
+[GitHub issues](https://github.com/anuragpaul602-netizen/chaobao-store/issues),
+labeled by how much context they need:
+
+- **`good first issue`** — self-contained, don't require deep familiarity with
+  the codebase (replacing placeholder content, docs, small config additions).
+- **`help wanted`** — bigger scope, involve design/engineering judgment
+  (new features, data model changes, infra).
+
+To contribute:
+1. Pick an open issue and leave a comment claiming it, so two people don't
+   duplicate work.
+2. Fork the repo, then follow "Run it" above to get set up locally.
+3. Before opening a PR, make sure `npm run lint`, `npm run typecheck`, and
+   `npm run build` all pass — there's no CI yet ([#10](https://github.com/anuragpaul602-netizen/chaobao-store/issues/10)
+   tracks adding it), so this is currently the only check.
+4. Open a PR referencing the issue it closes (e.g. `Closes #5`).
+
+Have an idea that isn't already an issue? Open one — bug reports and feature
+requests are welcome too.
