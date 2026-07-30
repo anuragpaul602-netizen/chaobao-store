@@ -8,5 +8,5 @@ import { authConfig } from "./auth.config";
 export const { auth: middleware } = NextAuth(authConfig);
 
 export const config = {
-  matcher: ["/checkout/:path*", "/account/:path*", "/orders/:path*"],
+  matcher: ["/checkout/:path*", "/account/:path*", "/orders/:path*", "/admin/:path*"],
 };

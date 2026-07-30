@@ -61,6 +61,11 @@ model Product {
 
 // --- Auth.js (NextAuth v5) standard schema ---
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -69,6 +74,7 @@ model User {
   image         String?
   /// Null for Google-only accounts; set (bcrypt hash) for Credentials sign-up.
   password      String?
+  role          Role      @default(USER)
 
   accounts Account[]
   sessions Session[]

@@ -30,18 +30,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const valid = await bcrypt.compare(password, user.password);
         if (!valid) return null;
 
-        return { id: user.id, name: user.name, email: user.email, image: user.image };
+        return { id: user.id, name: user.name, email: user.email, image: user.image, role: user.role };
       },
     }),
   ],
   callbacks: {
     ...authConfig.callbacks,
     jwt({ token, user }) {
-      if (user) token.sub = user.id;
+      if (user) {
+        token.sub = user.id;
+        token.role = (user as { role?: string }).role ?? "USER";
+      }
       return token;
     },
     session({ session, token }) {
       if (session.user && token.sub) session.user.id = token.sub;
+      if (session.user && typeof token.role === "string") session.user.role = token.role;
       return session;
     },
   },

@@ -97,6 +97,15 @@ local server with the [Stripe CLI](https://stripe.com/docs/stripe-cli):
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
+### 5.3 Working on the admin dashboard
+
+`/admin` (stock/price/badge editing) is gated to users with `role: ADMIN` —
+sign up a normal account first via `/register`, then promote it:
+
+```bash
+npx tsx scripts/make-admin.ts you@example.com
+```
+
 This prints a webhook signing secret — put it in `STRIPE_WEBHOOK_SECRET`.
 
 ## 6. Run it
