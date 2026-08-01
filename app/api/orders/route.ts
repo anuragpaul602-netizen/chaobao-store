@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { computeOrderTotals } from "@/lib/utils";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 interface OrderItemInput {
   productId: string;
@@ -107,6 +108,22 @@ export async function POST(request: Request) {
       items: { create: orderItemsData },
     },
   });
+
+  if (paymentMethod === "COD" && session.user.email) {
+    const fullAddress = `${shipping.name}, ${shipping.line1}${shipping.line2 ? `, ${shipping.line2}` : ""}, ${shipping.city}, ${shipping.state} - ${shipping.pincode}`;
+    
+    await sendOrderConfirmationEmail({
+      to: session.user.email,
+      orderId: order.id,
+      totalAmount: totalPaise / 100,
+      items: orderItemsData.map((item) => ({
+        name: `${item.brandSnapshot} ${item.nameSnapshot}`.trim(),
+        quantity: item.qty,
+        price: item.pricePaiseSnapshot / 100,
+      })),
+      shippingAddress: fullAddress,
+    });
+  }
 
   return NextResponse.json({ orderId: order.id });
 }
